@@ -1,8 +1,10 @@
+// src/pages/Scholarships.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 import ScholarshipCard from '../components/Scholarship/ScholarshipCard';
-import { Filter, Search } from 'lucide-react';
+import { Filter, Search, ChevronDown } from 'lucide-react';
 
 interface Scholarship {
   _id: string;
@@ -35,7 +37,8 @@ interface Scholarship {
   image_url: string;
 }
 
-const API_URL = 'http://localhost:5000/api';
+//  CHANGE: point to localhost:5000 (not /api)
+const API_URL = 'http://localhost:5000';
 
 const Scholarships: React.FC = () => {
   const location = useLocation();
@@ -45,13 +48,17 @@ const Scholarships: React.FC = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Fetch all scholarships
   useEffect(() => {
     const fetchScholarships = async () => {
       try {
         console.log('Fetching scholarships from API...');
-        const response = await fetch(`${API_URL}/scholarships`);
+        const response = await fetch(
+          `${API_URL}/api/scholarships?sortBy=${sortBy}&order=${sortOrder}`
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -68,7 +75,7 @@ const Scholarships: React.FC = () => {
     };
 
     fetchScholarships();
-  }, []);
+  }, [sortBy, sortOrder]);
 
   // Extract search query from URL if present
   useEffect(() => {
@@ -82,7 +89,9 @@ const Scholarships: React.FC = () => {
 
   const handleSearch = async (query: string) => {
     try {
-      const response = await fetch(`${API_URL}/scholarships/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(
+        `${API_URL}/api/scholarships/search?query=${encodeURIComponent(query)}&sortBy=${sortBy}&order=${sortOrder}`
+      );
       const data = await response.json();
       setFilteredScholarships(data);
     } catch (error) {
@@ -96,9 +105,9 @@ const Scholarships: React.FC = () => {
   };
 
   const toggleFilter = (filter: string) => {
-    setActiveFilters(prev => {
+    setActiveFilters((prev) => {
       if (prev.includes(filter)) {
-        return prev.filter(f => f !== filter);
+        return prev.filter((f) => f !== filter);
       } else {
         return [...prev, filter];
       }
@@ -108,11 +117,11 @@ const Scholarships: React.FC = () => {
   // Get all unique tags from eligibility criteria
   const allTags = React.useMemo(() => {
     const tags = new Set<string>();
-    scholarships.forEach(scholarship => {
+    scholarships.forEach((scholarship) => {
       if (scholarship.eligibility && scholarship.eligibility.criteria) {
-        scholarship.eligibility.criteria.forEach(criterion => {
-          const words = criterion.split(' ').filter(word => word.length > 3);
-          words.forEach(word => tags.add(word.toLowerCase()));
+        scholarship.eligibility.criteria.forEach((criterion) => {
+          const words = criterion.split(' ').filter((word) => word.length > 3);
+          words.forEach((word) => tags.add(word.toLowerCase()));
         });
       }
     });
@@ -125,9 +134,9 @@ const Scholarships: React.FC = () => {
       setFilteredScholarships(scholarships);
     } else {
       setFilteredScholarships(
-        scholarships.filter(scholarship =>
-          scholarship.eligibility.criteria.some(criterion =>
-            activeFilters.some(filter =>
+        scholarships.filter((scholarship) =>
+          scholarship.eligibility.criteria.some((criterion) =>
+            activeFilters.some((filter) =>
               criterion.toLowerCase().includes(filter.toLowerCase())
             )
           )
@@ -151,7 +160,7 @@ const Scholarships: React.FC = () => {
       <div className="bg-gray-50 py-10">
         <div className="container mx-auto px-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">Scholarships</h1>
-          
+
           <div className="mb-8">
             <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-grow">
@@ -180,12 +189,40 @@ const Scholarships: React.FC = () => {
               </button>
             </form>
           </div>
-          
+
+          {/* Sorting Controls */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <label htmlFor="sortBy" className="text-gray-700 font-medium">Sort by:</label>
+              <select
+                id="sortBy"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'date' | 'amount')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="date">Deadline Date</option>
+                <option value="amount">Amount</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="sortOrder" className="text-gray-700 font-medium">Order:</label>
+              <select
+                id="sortOrder"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
+
           {showFilters && (
             <div className="bg-white p-4 rounded-lg shadow-sm mb-8">
               <h2 className="font-semibold text-gray-700 mb-3">Filter by:</h2>
               <div className="flex flex-wrap gap-2">
-                {allTags.map(tag => (
+                {allTags.map((tag) => (
                   <button
                     key={tag}
                     onClick={() => toggleFilter(tag)}
@@ -209,10 +246,10 @@ const Scholarships: React.FC = () => {
               )}
             </div>
           )}
-          
+
           {filteredScholarships.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredScholarships.map(scholarship => (
+              {filteredScholarships.map((scholarship) => (
                 <ScholarshipCard key={scholarship._id} scholarship={scholarship} />
               ))}
             </div>
