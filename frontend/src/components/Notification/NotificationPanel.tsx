@@ -87,9 +87,18 @@ const NotificationPanel: React.FC = () => {
         <>
           <div className="fixed inset-0 bg-black bg-opacity-25 z-40" />
           <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 transform transition-all duration-200 ease-in-out">
-            <div className="p-4 border-b bg-gray-50">
-              <h3 className="text-lg font-semibold text-gray-800">Upcoming Deadlines</h3>
-              <p className="text-sm text-gray-500">Next 5 days</p>
+            <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Upcoming Deadlines</h3>
+                <p className="text-sm text-gray-500">Next 5 days</p>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="ml-2 text-gray-400 hover:text-gray-700 focus:outline-none text-xl font-bold"
+                aria-label="Close notifications"
+              >
+                &times;
+              </button>
             </div>
             <div className="max-h-96 overflow-y-auto">
               {notifications.length > 0 ? (

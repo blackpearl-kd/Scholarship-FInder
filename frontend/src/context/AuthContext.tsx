@@ -29,36 +29,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // In a real app, this would make an API call
-    // For now, we'll check against localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      if (userData.email === email) {
-        setUser(userData);
-        setIsAuthenticated(true);
-        localStorage.setItem('isAuthenticated', 'true');
-        return;
-      }
+    const response = await fetch('http://localhost:5000/api/user-profile/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email_id: email, password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Invalid credentials');
     }
-    throw new Error('Invalid credentials');
+
+    const data = await response.json();
+    setUser({ name: data.user.name, email: data.user.email_id });
+    setIsAuthenticated(true);
+    localStorage.setItem('user', JSON.stringify({ name: data.user.name, email: data.user.email_id }));
+    localStorage.setItem('userId', data.user._id || data.userId);
+    localStorage.setItem('isAuthenticated', 'true');
   };
 
   const signup = async (name: string, email: string, password: string) => {
-    // In a real app, this would make an API call
-    // For now, we'll store in localStorage
-    const newUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=60&h=60&dpr=1'
-    };
-    
-    localStorage.setItem('user', JSON.stringify(newUser));
-    localStorage.setItem('isAuthenticated', 'true');
-    
-    setUser(newUser);
-    setIsAuthenticated(true);
+    const response = await fetch('http://localhost:5000/api/user-profile/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email_id: email, password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create account');
+    }
+    // Optionally, you can log the user in automatically after signup by calling login(email, password) here.
   };
 
   const logout = () => {

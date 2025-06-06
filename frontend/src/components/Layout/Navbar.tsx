@@ -76,7 +76,7 @@ const Navbar: React.FC = () => {
                 {isDropdownOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
                   <Link 
                     to="/dashboard" 
                     className="block px-4 py-2 text-gray-700 hover:bg-blue-50"

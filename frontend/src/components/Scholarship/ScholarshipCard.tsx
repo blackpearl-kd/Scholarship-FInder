@@ -67,7 +67,7 @@ const ScholarshipCard: React.FC<ScholarshipCardProps> = ({ scholarship }) => {
         <p className="text-gray-600 text-sm mb-3">{scholarship.contact_details || ''}</p>
         <div className="flex items-center mb-4">
           <DollarSign className="h-4 w-4 text-green-600 mr-1" />
-          <span className="text-green-600 font-semibold">{formatCurrency(amount)}</span>
+          <span className="text-green-600 font-semibold">{(amount)}</span>
         </div>
         <div className="flex items-center mb-4">
           <Calendar className="h-4 w-4 mr-1 text-gray-500" />

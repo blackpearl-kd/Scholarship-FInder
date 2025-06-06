@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import scholarshipRoutes from './routes/scholarshipRoutes';
+import userProfileRoutes from './routes/userProfileRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ mongoose.connect(MONGODB_URI)
 
 // Routes
 app.use('/api/scholarships', scholarshipRoutes);
+app.use('/api/user-profile', userProfileRoutes);
 
 // Start server
 app.listen(PORT, () => {
