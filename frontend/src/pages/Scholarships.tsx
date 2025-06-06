@@ -50,6 +50,10 @@ const Scholarships: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedReligion, setSelectedReligion] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedEducation, setSelectedEducation] = useState('');
 
   // Fetch all scholarships
   useEffect(() => {
@@ -130,20 +134,45 @@ const Scholarships: React.FC = () => {
 
   // Apply filters
   useEffect(() => {
-    if (activeFilters.length === 0) {
-      setFilteredScholarships(scholarships);
-    } else {
-      setFilteredScholarships(
-        scholarships.filter((scholarship) =>
-          scholarship.eligibility.criteria.some((criterion) =>
-            activeFilters.some((filter) =>
-              criterion.toLowerCase().includes(filter.toLowerCase())
-            )
+    let filtered = scholarships;
+
+    // Existing tag/criteria filter
+    if (activeFilters.length > 0) {
+      filtered = filtered.filter((scholarship) =>
+        scholarship.eligibility.criteria.some((criterion) =>
+          activeFilters.some((filter) =>
+            criterion.toLowerCase().includes(filter.toLowerCase())
           )
         )
       );
     }
-  }, [activeFilters, scholarships]);
+
+    if (selectedState) {
+      filtered = filtered.filter(s => s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedState.toLowerCase())));
+    }
+    if (selectedReligion) {
+      filtered = filtered.filter(s => s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedReligion.toLowerCase())));
+    }
+    if (selectedCountry) {
+      filtered = filtered.filter(s => s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedCountry.toLowerCase())));
+    }
+    if (selectedEducation) {
+      const keywords = {
+        "Class 10": ["class 10", "matric", "10th", "tenth"],
+        "Class 12": ["class 12", "intermediate", "12th", "twelfth", "senior secondary"],
+        "UG": ["undergraduate", "bachelor", "b.tech", "b.e", "bsc", "ba", "bcom"],
+        "PG": ["postgraduate", "master", "m.tech", "m.e", "msc", "ma", "mcom"],
+        "PhD": ["phd", "doctoral", "doctorate", "research scholar"]
+      }[selectedEducation];
+      filtered = filtered.filter(s =>
+        s.eligibility?.criteria?.some(c =>
+          keywords?.some(k => c.toLowerCase().includes(k))
+        )
+      );
+    }
+
+    setFilteredScholarships(filtered);
+  }, [activeFilters, scholarships, selectedState, selectedReligion, selectedCountry, selectedEducation]);
 
   if (loading) {
     return (
@@ -214,6 +243,80 @@ const Scholarships: React.FC = () => {
               >
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            {/* State Filter */}
+            <div>
+              <label className="block text-gray-700">State</label>
+              <select
+                value={selectedState}
+                onChange={e => setSelectedState(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">All</option>
+                {["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+                  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+                  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+                  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+                  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+                  "Uttar Pradesh", "Uttarakhand", "West Bengal",
+                  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+                  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+                ].map(state => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+            </div>
+            {/* Religion Filter */}
+            <div>
+              <label className="block text-gray-700">Religion</label>
+              <select
+                value={selectedReligion}
+                onChange={e => setSelectedReligion(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">All</option>
+                {["Hindu", "Muslim", "Christian", "Sikh", "Jain", "Buddhist"].map(religion => (
+                  <option key={religion} value={religion}>{religion}</option>
+                ))}
+              </select>
+            </div>
+            {/* Country Filter */}
+            <div>
+              <label className="block text-gray-700">Country</label>
+              <select
+                value={selectedCountry}
+                onChange={e => setSelectedCountry(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">All</option>
+                {["India", "USA", "UK", "Canada", "Australia"].map(country => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
+              </select>
+            </div>
+            {/* Education Level Filter */}
+            <div>
+              <label className="block text-gray-700">Education Level</label>
+              <select
+                value={selectedEducation}
+                onChange={e => setSelectedEducation(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">All</option>
+                {Object.keys({
+                  "Class 10": ["class 10", "matric", "10th", "tenth"],
+                  "Class 12": ["class 12", "intermediate", "12th", "twelfth", "senior secondary"],
+                  "UG": ["undergraduate", "bachelor", "b.tech", "b.e", "bsc", "ba", "bcom"],
+                  "PG": ["postgraduate", "master", "m.tech", "m.e", "msc", "ma", "mcom"],
+                  "PhD": ["phd", "doctoral", "doctorate", "research scholar"]
+                }).map(level => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
               </select>
             </div>
           </div>
