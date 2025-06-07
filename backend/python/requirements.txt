@@ -1,0 +1,7 @@
+selenium==4.15.2
+webdriver-manager==4.0.1
+beautifulsoup4==4.12.2
+pymongo==4.6.0
+textblob==0.17.1
+python-dotenv==1.0.0
+schedule==1.2.1 
