@@ -1,4 +1,4 @@
-# 🎓 Scholarship Finder Tool
+# 🎓 Scholarship Finder Tool (Scholar Hub)
 
 ## 🧩 Problem Statement
 
@@ -19,10 +19,10 @@ Finding relevant scholarships is often time-consuming and overwhelming for stude
 
 | Layer        | Tools / Frameworks |
 |--------------|--------------------|
-| Frontend     | HTML, CSS, React.js |
-| Backend      | Node.js, Express.js / FastAPI |
-| Scraping     | BeautifulSoup, Scrapy |
-| Sentiment Analysis | TextBlob, VADER |
+| Frontend     | HTML, CSS, React.js, Typescript |
+| Backend      | Node.js, Express.js |
+| Scraping     | BeautifulSoup, Selenium|
+| Sentiment Analysis | TextBlob |
 | Database     | MongoDB |
 
 ---
@@ -62,6 +62,13 @@ Finding relevant scholarships is often time-consuming and overwhelming for stude
   - Direct application link
 
 ---
+
+### Automation
+- This project uses GitHub Actions to automate workflows such as testing, deployment, or database operations with a secure connection to MongoDB.
+Features
+ - Automated CI/CD with GitHub Actions
+ - Secure MongoDB connection using GitHub Secrets
+ - Environment variable management for sensitive data
 
 ## 🚀 Deployment (on [Render](https://render.com))
 
