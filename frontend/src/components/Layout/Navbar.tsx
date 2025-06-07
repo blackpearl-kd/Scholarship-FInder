@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bookmark, Search, Bell, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bookmark, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import NotificationPanel from '../Notification/NotificationPanel';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -38,9 +39,6 @@ const Navbar: React.FC = () => {
           <Link to="/scholarships" className="text-gray-700 hover:text-blue-600 font-medium">
             Scholarships
           </Link>
-          <Link to="/resources" className="text-gray-700 hover:text-blue-600 font-medium">
-            Resources
-          </Link>
           <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium">
             About
           </Link>
@@ -58,9 +56,9 @@ const Navbar: React.FC = () => {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         </form>
         <div className="flex items-center">
-          <button className="mr-4 text-gray-600 hover:text-blue-600">
-            <Bell className="h-5 w-5" />
-          </button>
+          <div className="mr-4">
+            <NotificationPanel />
+          </div>
           {isAuthenticated ? (
             <div className="relative">
               <button 

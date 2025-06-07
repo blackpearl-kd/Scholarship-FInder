@@ -14,7 +14,6 @@ import SavedScholarships from './pages/SavedScholarships';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import About from './pages/About';
-import Resources from './pages/Resources';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -48,7 +47,6 @@ const AppRoutes = () => {
         <Route path="/scholarships/search" element={<Scholarships />} />
         <Route path="/scholarships/:id" element={<ScholarshipDetail />} />
         <Route path="/about" element={<About />} />
-        <Route path="/resources" element={<Resources />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         

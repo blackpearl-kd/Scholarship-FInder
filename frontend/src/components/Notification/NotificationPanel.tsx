@@ -90,7 +90,6 @@ const NotificationPanel: React.FC = () => {
             <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">Upcoming Deadlines</h3>
-                <p className="text-sm text-gray-500">Next 5 days</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}

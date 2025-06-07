@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import scholarshipRoutes from './routes/scholarshipRoutes';
 import userProfileRoutes from './routes/userProfileRoutes';
+import { scheduleCleanup } from './tasks/cleanupExpiredScholarships';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,9 @@ mongoose.connect(MONGODB_URI)
         console.log('Database:', mongoose.connection.db.databaseName);
         const collections = await mongoose.connection.db.listCollections().toArray();
         console.log('Collections:', collections.map(c => c.name));
+        
+        // Start the scheduled cleanup task after database connection is established
+        scheduleCleanup();
       }
     });
   })

@@ -63,37 +63,6 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">RESOURCES</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/resources/application-tips" className="text-gray-300 hover:text-white">
-                  Application Tips
-                </Link>
-              </li>
-              <li>
-                <Link to="/resources/essay-writing" className="text-gray-300 hover:text-white">
-                  Essay Writing
-                </Link>
-              </li>
-              <li>
-                <Link to="/resources/financial-aid" className="text-gray-300 hover:text-white">
-                  Financial Aid Guide
-                </Link>
-              </li>
-              <li>
-                <Link to="/resources/faq" className="text-gray-300 hover:text-white">
-                  Scholarship FAQ
-                </Link>
-              </li>
-              <li>
-                <Link to="/resources/success-stories" className="text-gray-300 hover:text-white">
-                  Success Stories
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
             <h3 className="text-lg font-semibold mb-4">COMPANY</h3>
             <ul className="space-y-2">
               <li>
@@ -104,11 +73,6 @@ const Footer: React.FC = () => {
               <li>
                 <Link to="/contact" className="text-gray-300 hover:text-white">
                   Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/careers" className="text-gray-300 hover:text-white">
-                  Careers
                 </Link>
               </li>
               <li>
