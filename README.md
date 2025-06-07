@@ -67,4 +67,5 @@ Finding relevant scholarships is often time-consuming and overwhelming for stude
 
 We use [Render](https://render.com) to host both frontend and backend:
 
-website:
+website: https://scholarship-finder-1-nq0u.onrender.com
+
