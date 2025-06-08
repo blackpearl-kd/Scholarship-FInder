@@ -43,9 +43,9 @@ jobs:
     - name: Run daily tasks
       env:
         MONGO_URI: ${{ secrets.MONGO_URI }}
-      run: |
-        cd backend/python
-        python run_daily_tasks.py
+      working-directory: backend/python
+      run: python -m run_daily_tasks
+
         
     - name: Commit and push if changes
       run: |
