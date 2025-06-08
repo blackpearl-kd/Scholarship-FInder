@@ -1,9 +1,11 @@
 import os
 import logging
 from datetime import datetime
-from backend.python.scraper import scrape_and_store_scholarships
-from recommend_scholarships import generate_recommendations
 from dotenv import load_dotenv
+
+# Absolute imports from your package
+from backend.python.scraper import scrape_and_store_scholarships
+from backend.python.recommend_scholarships import generate_recommendations
 
 # Setup logging
 logging.basicConfig(
@@ -18,31 +20,26 @@ logger = logging.getLogger(__name__)
 
 def run_daily_tasks():
     try:
-        # Load environment variables
+        # Load .env (if you’re using one locally)
         load_dotenv()
-        
-        # Log start of process
+
         logger.info("Starting daily scholarship update process")
         start_time = datetime.now()
-        
-        # Run scraper
+
         logger.info("Starting scholarship scraping")
         scrape_and_store_scholarships()
         logger.info("Completed scholarship scraping")
-        
-        # Run recommendation engine
+
         logger.info("Starting recommendation generation")
         generate_recommendations()
         logger.info("Completed recommendation generation")
-        
-        # Log completion
-        end_time = datetime.now()
-        duration = end_time - start_time
+
+        duration = datetime.now() - start_time
         logger.info(f"Daily tasks completed successfully in {duration}")
-        
-    except Exception as e:
-        logger.error(f"Error in daily tasks: {str(e)}", exc_info=True)
+
+    except Exception:
+        logger.exception("Error in daily tasks")
         raise
 
 if __name__ == "__main__":
-    run_daily_tasks() 
+    run_daily_tasks()
