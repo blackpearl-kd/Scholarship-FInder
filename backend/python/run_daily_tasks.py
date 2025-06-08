@@ -1,7 +1,7 @@
 import os
 import logging
 from datetime import datetime
-from scraper import scrape_and_store_scholarships
+from .scraper import scrape_and_store_scholarships
 from recommend_scholarships import generate_recommendations
 from dotenv import load_dotenv
 
