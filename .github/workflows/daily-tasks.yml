@@ -2,54 +2,57 @@ name: Daily Scholarship Update
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
-  workflow_dispatch:  # Allows manual triggering
+    - cron: '0 0 * * *'      # Runs at 00:00 UTC every day
+  workflow_dispatch:        # Allows manual triggering
 
 jobs:
   update-scholarships:
     runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        
-    - name: Install Chrome
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
-        
-    - name: Install Python dependencies
-      run: |
-        cd backend/python
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        
-    - name: Install Node.js dependencies
-      run: |
-        cd backend
-        npm install
-        cd ../frontend
-        npm install
-        
-    - name: Run daily tasks
-      env:
-        MONGO_URI: ${{ secrets.MONGO_URI }}
-      working-directory: backend/python
-      run: python -m run_daily_tasks
 
-        
-    - name: Commit and push if changes
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update scholarships and recommendations [skip ci]" && git push) 
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install Python dependencies
+        run: |
+          cd backend/python
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Node.js dependencies
+        run: |
+          cd backend
+          npm install
+          cd ../frontend
+          npm install
+
+      - name: Run daily tasks
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+        run: |
+          # from the repo root, invoke as a package
+          python -m backend.python.run_daily_tasks
+
+      - name: Commit and push if changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git diff --quiet && git diff --staged --quiet || (
+            git commit -m "Update scholarships and recommendations [skip ci]" &&
+            git push
+          )
