@@ -35,6 +35,15 @@ interface Scholarship {
   last_updated: string;
   selection_criteria: string;
   image_url: string;
+  // Additional fields from MongoDB
+  country?: string;
+  education_level?: string[];
+  gender?: string;
+  religion?: string;
+  state?: string;
+  sentiment_score?: number;
+  scraped_at?: string;
+  about_program?: string;
 }
 
 //  CHANGE: point to localhost:5000 (not /api)
@@ -93,13 +102,37 @@ const Scholarships: React.FC = () => {
 
   const handleSearch = async (query: string) => {
     try {
+      console.log('Searching for:', query);
       const response = await fetch(
         `${API_URL}/api/scholarships/search?query=${encodeURIComponent(query)}&sortBy=${sortBy}&order=${sortOrder}`
       );
       const data = await response.json();
+      console.log('Search results:', data.length);
       setFilteredScholarships(data);
     } catch (error) {
       console.error('Error searching scholarships:', error);
+      // Fallback to client-side search if API search fails
+      const query = searchQuery.toLowerCase();
+      const filtered = scholarships.filter((scholarship) => {
+        return (
+          scholarship.title?.toLowerCase().includes(query) ||
+          scholarship.amount?.toLowerCase().includes(query) ||
+          scholarship.eligibility?.eligibility_summary?.toLowerCase().includes(query) ||
+          scholarship.selection_criteria?.toLowerCase().includes(query) ||
+          scholarship.about_program?.toLowerCase().includes(query) ||
+          scholarship.country?.toLowerCase().includes(query) ||
+          scholarship.state?.toLowerCase().includes(query) ||
+          scholarship.religion?.toLowerCase().includes(query) ||
+          scholarship.education_level?.some(level => level.toLowerCase().includes(query)) ||
+          scholarship.eligibility?.criteria?.some(criterion => 
+            criterion.toLowerCase().includes(query)
+          ) ||
+          scholarship.benefits?.some(benefit => 
+            benefit.toLowerCase().includes(query)
+          )
+        );
+      });
+      setFilteredScholarships(filtered);
     }
   };
 
@@ -122,57 +155,158 @@ const Scholarships: React.FC = () => {
   const allTags = React.useMemo(() => {
     const tags = new Set<string>();
     scholarships.forEach((scholarship) => {
-      if (scholarship.eligibility && scholarship.eligibility.criteria) {
+      // Extract tags from eligibility criteria
+      if (scholarship.eligibility?.criteria) {
         scholarship.eligibility.criteria.forEach((criterion) => {
           const words = criterion.split(' ').filter((word) => word.length > 3);
           words.forEach((word) => tags.add(word.toLowerCase()));
         });
       }
+      
+      // Extract tags from eligibility summary
+      if (scholarship.eligibility?.eligibility_summary) {
+        const words = scholarship.eligibility.eligibility_summary.split(' ').filter((word) => word.length > 3);
+        words.forEach((word) => tags.add(word.toLowerCase()));
+      }
+      
+      // Extract tags from selection criteria
+      if (scholarship.selection_criteria) {
+        const words = scholarship.selection_criteria.split(' ').filter((word) => word.length > 3);
+        words.forEach((word) => tags.add(word.toLowerCase()));
+      }
+      
+      // Extract tags from about_program
+      if (scholarship.about_program) {
+        const words = scholarship.about_program.split(' ').filter((word) => word.length > 3);
+        words.forEach((word) => tags.add(word.toLowerCase()));
+      }
+      
+      // Extract tags from benefits
+      if (scholarship.benefits) {
+        scholarship.benefits.forEach((benefit) => {
+          const words = benefit.split(' ').filter((word) => word.length > 3);
+          words.forEach((word) => tags.add(word.toLowerCase()));
+        });
+      }
+      
+      // Add specific tags from structured fields
+      if (scholarship.country && scholarship.country !== 'Any') {
+        tags.add(scholarship.country.toLowerCase());
+      }
+      if (scholarship.state && scholarship.state !== 'Any') {
+        tags.add(scholarship.state.toLowerCase());
+      }
+      if (scholarship.religion && scholarship.religion !== 'Any') {
+        tags.add(scholarship.religion.toLowerCase());
+      }
+      if (scholarship.education_level) {
+        scholarship.education_level.forEach(level => {
+          tags.add(level.toLowerCase());
+        });
+      }
     });
-    return Array.from(tags);
+    return Array.from(tags).sort();
   }, [scholarships]);
 
   // Apply filters
   useEffect(() => {
     let filtered = scholarships;
 
-    // Existing tag/criteria filter
+    // Apply search query filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((scholarship) => {
+        return (
+          scholarship.title?.toLowerCase().includes(query) ||
+          scholarship.amount?.toLowerCase().includes(query) ||
+          scholarship.eligibility?.eligibility_summary?.toLowerCase().includes(query) ||
+          scholarship.selection_criteria?.toLowerCase().includes(query) ||
+          scholarship.about_program?.toLowerCase().includes(query) ||
+          scholarship.country?.toLowerCase().includes(query) ||
+          scholarship.state?.toLowerCase().includes(query) ||
+          scholarship.religion?.toLowerCase().includes(query) ||
+          scholarship.education_level?.some(level => level.toLowerCase().includes(query)) ||
+          scholarship.eligibility?.criteria?.some(criterion => 
+            criterion.toLowerCase().includes(query)
+          ) ||
+          scholarship.benefits?.some(benefit => 
+            benefit.toLowerCase().includes(query)
+          )
+        );
+      });
+    }
+
+    // Apply tag/criteria filters
     if (activeFilters.length > 0) {
       filtered = filtered.filter((scholarship) =>
-        scholarship.eligibility.criteria.some((criterion) =>
+        scholarship.eligibility?.criteria?.some((criterion) =>
           activeFilters.some((filter) =>
             criterion.toLowerCase().includes(filter.toLowerCase())
           )
-        )
+        ) ||
+        scholarship.eligibility?.eligibility_summary?.toLowerCase().includes(activeFilters.join(' ').toLowerCase()) ||
+        scholarship.selection_criteria?.toLowerCase().includes(activeFilters.join(' ').toLowerCase()) ||
+        scholarship.about_program?.toLowerCase().includes(activeFilters.join(' ').toLowerCase())
       );
     }
 
+    // Apply state filter - use the actual state field from MongoDB
     if (selectedState) {
-      filtered = filtered.filter(s => s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedState.toLowerCase())));
+      filtered = filtered.filter(s => 
+        s.state?.toLowerCase() === selectedState.toLowerCase() ||
+        s.state === 'Any' ||
+        s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedState.toLowerCase())) ||
+        s.eligibility?.eligibility_summary?.toLowerCase().includes(selectedState.toLowerCase()) ||
+        s.selection_criteria?.toLowerCase().includes(selectedState.toLowerCase())
+      );
     }
+
+    // Apply religion filter - use the actual religion field from MongoDB
     if (selectedReligion) {
-      filtered = filtered.filter(s => s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedReligion.toLowerCase())));
+      filtered = filtered.filter(s => 
+        s.religion?.toLowerCase() === selectedReligion.toLowerCase() ||
+        s.religion === 'Any' ||
+        s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedReligion.toLowerCase())) ||
+        s.eligibility?.eligibility_summary?.toLowerCase().includes(selectedReligion.toLowerCase()) ||
+        s.selection_criteria?.toLowerCase().includes(selectedReligion.toLowerCase())
+      );
     }
+
+    // Apply country filter - use the actual country field from MongoDB
     if (selectedCountry) {
-      filtered = filtered.filter(s => s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedCountry.toLowerCase())));
+      filtered = filtered.filter(s => 
+        s.country?.toLowerCase() === selectedCountry.toLowerCase() ||
+        s.country === 'Any' ||
+        s.eligibility?.criteria?.some(c => c.toLowerCase().includes(selectedCountry.toLowerCase())) ||
+        s.eligibility?.eligibility_summary?.toLowerCase().includes(selectedCountry.toLowerCase()) ||
+        s.selection_criteria?.toLowerCase().includes(selectedCountry.toLowerCase())
+      );
     }
+
+    // Apply education level filter - use the actual education_level field from MongoDB
     if (selectedEducation) {
       const keywords = {
-        "Class 10": ["class 10", "matric", "10th", "tenth"],
-        "Class 12": ["class 12", "intermediate", "12th", "twelfth", "senior secondary"],
-        "UG": ["undergraduate", "bachelor", "b.tech", "b.e", "bsc", "ba", "bcom"],
-        "PG": ["postgraduate", "master", "m.tech", "m.e", "msc", "ma", "mcom"],
-        "PhD": ["phd", "doctoral", "doctorate", "research scholar"]
-      }[selectedEducation];
+        "Class 10": ["class 10", "matric", "10th", "tenth", "secondary"],
+        "Class 12": ["class 12", "intermediate", "12th", "twelfth", "senior secondary", "higher secondary"],
+        "UG": ["undergraduate", "bachelor", "b.tech", "b.e", "bsc", "ba", "bcom", "bachelor's", "undergrad"],
+        "PG": ["postgraduate", "master", "m.tech", "m.e", "msc", "ma", "mcom", "master's", "postgrad"],
+        "PhD": ["phd", "doctoral", "doctorate", "research scholar", "doctor of philosophy"]
+      }[selectedEducation] || [];
+
       filtered = filtered.filter(s =>
+        // Check if the scholarship's education_level array contains the selected level
+        s.education_level?.some(level => level.toLowerCase() === selectedEducation.toLowerCase()) ||
+        // Fallback to keyword matching
         s.eligibility?.criteria?.some(c =>
-          keywords?.some(k => c.toLowerCase().includes(k))
-        )
+          keywords.some(k => c.toLowerCase().includes(k))
+        ) ||
+        s.eligibility?.eligibility_summary?.toLowerCase().includes(keywords.join(' ').toLowerCase()) ||
+        s.selection_criteria?.toLowerCase().includes(keywords.join(' ').toLowerCase())
       );
     }
 
     setFilteredScholarships(filtered);
-  }, [activeFilters, scholarships, selectedState, selectedReligion, selectedCountry, selectedEducation]);
+  }, [activeFilters, scholarships, selectedState, selectedReligion, selectedCountry, selectedEducation, searchQuery]);
 
   if (loading) {
     return (
@@ -319,6 +453,24 @@ const Scholarships: React.FC = () => {
                 ))}
               </select>
             </div>
+            {/* Clear All Filters Button */}
+            {(selectedState || selectedReligion || selectedCountry || selectedEducation || activeFilters.length > 0) && (
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setSelectedState('');
+                    setSelectedReligion('');
+                    setSelectedCountry('');
+                    setSelectedEducation('');
+                    setActiveFilters([]);
+                    setSearchQuery('');
+                  }}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition duration-200"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            )}
           </div>
 
           {showFilters && (
@@ -351,17 +503,40 @@ const Scholarships: React.FC = () => {
           )}
 
           {filteredScholarships.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredScholarships.map((scholarship) => (
-                <ScholarshipCard key={scholarship._id} scholarship={scholarship} />
-              ))}
+            <div>
+              <div className="mb-4 text-gray-600">
+                Showing {filteredScholarships.length} of {scholarships.length} scholarships
+                {(selectedState || selectedReligion || selectedCountry || selectedEducation || activeFilters.length > 0 || searchQuery) && (
+                  <span className="text-blue-600"> (filtered)</span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredScholarships.map((scholarship) => (
+                  <ScholarshipCard key={scholarship._id} scholarship={scholarship} />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="text-center py-12">
               <h3 className="text-xl font-semibold text-gray-700 mb-2">No scholarships found</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 Try adjusting your search or filters to find more results.
               </p>
+              {(selectedState || selectedReligion || selectedCountry || selectedEducation || activeFilters.length > 0 || searchQuery) && (
+                <button
+                  onClick={() => {
+                    setSelectedState('');
+                    setSelectedReligion('');
+                    setSelectedCountry('');
+                    setSelectedEducation('');
+                    setActiveFilters([]);
+                    setSearchQuery('');
+                  }}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200"
+                >
+                  Clear All Filters
+                </button>
+              )}
             </div>
           )}
         </div>

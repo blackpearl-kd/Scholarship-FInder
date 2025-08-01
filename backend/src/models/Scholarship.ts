@@ -35,7 +35,16 @@ const scholarshipSchema = new mongoose.Schema({
   important_links: [linkSchema],
   last_updated: String,
   selection_criteria: String,
-  image_url: String
+  image_url: String,
+  // Additional fields from actual MongoDB data
+  country: String,
+  education_level: [String],
+  gender: String,
+  religion: String,
+  state: String,
+  sentiment_score: Number,
+  scraped_at: Date,
+  about_program: String
 });
 
 export const Scholarship = mongoose.model('Scholarship', scholarshipSchema, 'scholarships'); 

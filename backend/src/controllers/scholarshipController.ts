@@ -100,7 +100,20 @@ export const searchScholarships = async (req: Request, res: Response) => {
       $or: [
         { title: searchRegex },
         { 'eligibility.eligibility_summary': searchRegex },
-        { amount: searchRegex }
+        { 'eligibility.criteria': searchRegex },
+        { amount: searchRegex },
+        { benefits: searchRegex },
+        { selection_criteria: searchRegex },
+        { contact_details: searchRegex },
+        { documents: searchRegex },
+        { 'how_to_apply.instructions': searchRegex },
+        { 'how_to_apply.notes': searchRegex },
+        { important_dates: searchRegex },
+        { about_program: searchRegex },
+        { country: searchRegex },
+        { state: searchRegex },
+        { religion: searchRegex },
+        { education_level: searchRegex }
       ]
     });
     
