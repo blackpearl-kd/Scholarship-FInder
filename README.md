@@ -27,7 +27,7 @@ Finding relevant scholarships is often time-consuming and overwhelming for stude
 
 ---
 
-## 🚀 Features
+## 🚀 Features 
 
 ### 🔐 Student Profile Section
 - Input fields for:
